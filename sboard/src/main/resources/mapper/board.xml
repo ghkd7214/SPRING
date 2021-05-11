@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.board">
+	
+	<insert id="INSERT_ARTICLE" useGeneratedKeys="true" keyProperty="seq">
+		INSERT INTO `JBOARD_ARTICLE` SET `title`=#{title},
+										 `content`=#{content},
+										 `uid`=#{uid},
+										 `file`=#{file},
+										 `regip`=#{regip},
+										 `rdate`=NOW();	
+	</insert>
+	
+	<select id="SELECT_COUNT_ARTICLE" resultType="int">
+		SELECT COUNT(*) FROM `JBOARD_ARTICLE` WHERE `parent`=0 AND `cate`='free';		
+	</select>
+
+	<select id="SELECT_ARTICLES" resultType="kr.co.sboard.vo.ArticleVo">
+		SELECT a.*, b.nick FROM `JBOARD_ARTICLE` AS a
+		JOIN `JBOARD_USER` AS b ON	a.uid = b.uid
+		WHERE `parent`=0 AND `cate`='free'
+		ORDER BY `seq` DESC
+		LIMIT #{start}, 10;		
+	</select>
+
+	<select id="SELECT_ARTICLE" resultType="kr.co.sboard.vo.ArticleVo">
+		SELECT a.*, b.oldName, b.newName, b.download FROM `JBOARD_ARTICLE` AS a
+		LEFT JOIN `JBOARD_FILE` AS b ON a.seq = b.parent
+		WHERE a.`parent` = 0 AND a.`seq`=${seq};
+	</select>
+
+</mapper>
