@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>index</title>
+</head>
+<body>
+	<h3>[[${title}]]</h3>
+	
+	<h4>th:text</h4>
+	<p th:text="${hello}"></p>
+	<p>[[${hello}]]</p>
+	
+	
+	
+	<h4>th:if</h4>
+	<p>
+		<a href="#" th:if="${user}">
+			[[${user.name}]]님 반갑습니다.
+		</a>
+		
+		<a href="#" th:unless="${user}">
+			user값이 없습니다.
+		</a>
+	</p>
+	
+	
+	<h4>th:each</h4>
+	<table border="1">
+		<tr th:each="user:${users}">
+			<td>[[${user.uid}]]</td>
+			<td>[[${user.name}]]</td>
+			<td>[[${user.hp}]]</td>
+			<td>[[${user.age}]]</td>
+		</tr>
+	</table>
+	
+	<h4>th:href</h4>
+	<a th:href="@{/include}">타임리프 링크</a>
+	
+
+</body>
+</html>
