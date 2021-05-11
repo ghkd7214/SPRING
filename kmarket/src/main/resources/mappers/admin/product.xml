@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.kmarket.dao.admin.AdminProductDao">
+
+	<insert id="insertProduct">
+		INSERT INTO `km_product` SET
+			`cate1`		= #{cate1},
+			`cate2`		= #{cate2},
+			`name`		= #{name},
+			`descript`	= #{descript},
+			`company`	= #{company},
+			`seller`	= #{seller},
+			`price`		= #{price},
+			`discount`	= #{discount},
+			`point`		= #{point},
+			`stock`		= #{stock},
+			`delivery`	= #{delivery},
+			`thumb1`	= #{thumb1},
+			`thumb2`	= #{thumb2},
+			`thumb3`	= #{thumb3},
+			`detail`	= #{detail},
+			`status`	= #{status},
+			`dutyFree`	= #{dutyFree},
+			`receipt`	= #{receipt},
+			`bizClass`	= #{bizClass},
+			`origin`	= #{origin},
+			`ip`		= #{ip},
+			`rdate`		= NOW();	
+	</insert>
+
+	<select id="selectCate1" resultType="kr.co.kmarket.vo.Cate1Vo">
+		SELECT * FROM `km_cate1`;
+	</select>
+	
+	<select id="selectCate2" resultType="kr.co.kmarket.vo.Cate2Vo">
+		SELECT * FROM `km_cate2` WHERE `code1`=#{code1};
+	</select>
+
+
+	<select id="selectProduct"  resultType="kr.co.kmarket.vo.MemberVo"></select>
+	<select id="selectProducts" resultType="kr.co.kmarket.vo.MemberVo"></select>
+	<update id="updateProduct"></update>
+	<delete id="deleteProduct"></delete>
+</mapper>

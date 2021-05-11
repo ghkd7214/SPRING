@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.kmarket.dao.MemberDao">
+	<insert id="insertMember"></insert>
+	<select id="selectMember"  resultType="kr.co.kmarket.vo.MemberVo">
+		SELECT * FROM `km_member` WHERE `uid`=#{uid} AND `pass`=PASSWORD(#{pass});
+	</select>
+	<select id="selectMembers" resultType="kr.co.kmarket.vo.MemberVo"></select>
+	<update id="updateMember"></update>
+	<delete id="deleteMember"></delete>
+</mapper>

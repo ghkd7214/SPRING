@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.kmarket.dao.MainDao">
+	
+	<resultMap id="categoriesMap" type="kr.co.kmarket.vo.CategoriesVo">
+		<result property="code1" column="code1"/>
+		<result property="title" column="tit1"/>
+		
+		<collection property="cate2List" ofType="kr.co.kmarket.vo.Cate2Vo">			
+			<result property="code1" column="code1"/>
+			<result property="code2" column="code2"/>
+			<result property="title" column="tit2"/>		
+		</collection>	
+	</resultMap>
+	
+	<select id="selectCategories" resultMap="categoriesMap">
+		SELECT c1.code1, c2.code2, c1.title AS tit1, c2.title AS tit2
+		FROM `km_cate1` AS c1
+		JOIN `km_cate2` AS c2
+		ON c1.code1 = c2.code1
+		ORDER BY c1.code1, c2.code2;	
+	</select>
+	
+	<select id="selectBestProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` ORDER BY `sold` DESC LIMIT 5;
+	</select>
+	<select id="selectHitProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` ORDER BY `hit` DESC LIMIT 8;
+	</select>
+	<select id="selectRecommendProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` ORDER BY `score` DESC LIMIT 8;
+	</select>
+	<select id="selectLatestProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` ORDER BY `rdate` DESC LIMIT 8;
+	</select>
+	<select id="selectDiscountProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` ORDER BY `discount` DESC LIMIT 8;
+	</select>
+	
+	
+</mapper>

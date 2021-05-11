@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:include="@{_header.html}"/>
+<script th:inline="javascript">
+
+	// 최초 집계 실행
+	aggregateProduct();
+
+	function aggregateProduct() {	
+		//전체합계 집계
+		$(function(){
+			
+			var checkedProduct = $('.product_check:checked').parent().parent();
+								
+			// 상품 수 집계
+			var tagCount = checkedProduct.find('.count');
+			var totCount = 0;
+			
+			$.each(tagCount, function(){
+				var count = parseInt($(this).text());
+				totCount += count;
+			});
+			
+			$('.info tr:nth-child(1) > td:nth-child(2)').text(totCount);
+			
+			// 판매가 집계
+			var tagPrice = checkedProduct.find('.price');
+			var totPrice = 0;
+			
+			$.each(tagPrice, function(){
+				var price = parseInt($(this).text().replace(/,/g, ''));					
+				totPrice += price;
+			});
+			
+			$('.info tr:nth-child(2) > td:nth-child(2)').text(totPrice.toLocaleString());
+			
+			// 할인금액 집계
+			var tagDiscount = checkedProduct.find('.discount');
+			var totDiscount = 0;
+			
+			$.each(tagDiscount, function(){
+				
+				var discount = $(this).text().replace(/%/g, '')
+				
+				if(discount != '-'){
+					var price = $(this).prev().text().replace(/,/g, '');
+					totDiscount += parseInt(price * discount / 100);
+				}								
+			});
+			
+			$('.info tr:nth-child(3) > td:nth-child(2)').text(totDiscount.toLocaleString());
+			
+			// 배송비 집계
+			var tagDelivery = checkedProduct.find('.delivery');
+			var totDelivery = 0;
+			
+			$.each(tagDelivery, function(){
+				
+				var delivery = $(this).text().replace(/,/g, '');
+				
+				if(delivery != '무료배송'){				
+					totDelivery += parseInt(delivery);
+				}
+			});
+			
+			$('.info tr:nth-child(4) > td:nth-child(2)').text(totDelivery.toLocaleString());
+			
+			// 포인트 집계
+			var tagPoint = checkedProduct.find('.point');
+			var totPoint = 0;
+			
+			$.each(tagPoint, function(){
+				
+				var point = $(this).text().replace(/,/g, '');							
+				totPoint += parseInt(point);				
+			});
+			
+			$('.info tr:nth-child(5) > td:nth-child(2)').text(totPoint.toLocaleString());
+			
+			// 전체주문금액(소계) 집계
+			var tagTotal = checkedProduct.find('.total');
+			var totTotal = 0;
+			
+			$.each(tagTotal, function(){				
+				var total = $(this).text().replace(/,/g, '');							
+				totTotal += parseInt(total);							
+			});
+			
+			$('.info tr:nth-child(6) > td:nth-child(2)').text(totTotal.toLocaleString());
+			
+		});
+		
+	} // aggregateProduct function end
+	
+	// 상품 체크박스
+	$(function(){
+		var checkAll      = $('input[name=all]');
+		var checkProducts = $('input.product_check');
+		
+		checkAll.change(function(){
+			
+			var productCheck = $('.product_check');
+			
+			if($(this).is(':checked') == false){
+				// 모든 체크박스 해제
+				productCheck.prop('checked', false);
+			}else{
+				// 전체 체크
+				productCheck.prop('checked', true);
+			}
+
+			// 집계 재조정
+			aggregateProduct();
+			
+		}); // checkAll change end
+		
+		// 개별상품 체크박스 변경시
+		checkProducts.change(function(){
+			// 상품 재집계
+			aggregateProduct();
+		}); // checkProducts change end
+	});
+	
+	// 삭제하기 버튼
+	$(function(){
+		
+		$('input[name=del]').click(function(){
+			
+			var checkedProducts = $('.product_check:checked');
+			var cartSeqs = [];
+			
+			checkedProducts.each(function(i, product){				
+				cartSeqs.push(product.value);				
+			});
+			
+			var params = {"cartSeqs": cartSeqs};
+	
+			$.ajax({
+				url: '/kmarket/shop/cartRemove',				
+				type: 'get',
+				traditional: true,
+				data: params,
+				dataType: 'json',
+				success: function(data){
+					// DB 삭제 후 화면삭제 진행
+					//alert("삭제 갯수 : "+data.result);
+					
+					// 다시 장바구니를 요청해서 화면갱신(refresh) 하는 방법 
+					//location.href='/kmarket/shop/cart';
+					
+					// 화면갱신(refresh)없이 삭제 상품만 제거 최종화면 출력
+					var inputCheck = $('input.product_check:checked');	
+					inputCheck.parent().parent().remove();
+					
+					// 집계 초기화
+					aggregateProduct();
+				}
+			});
+		});
+	}); // 삭제하기 끝
+	
+	// 주문하기
+	$(function(){
+		
+		$('input[name=order]').click(function(){
+			
+			var checkedProducts = $('.product_check:checked');
+			var codes = [];
+			
+			checkedProducts.each(function(i, product){				
+				codes.push(product.name);				
+			});
+			
+			var uid      = [[${session.smember.uid}]];
+			var count    = $('.info .count').text().replace(/,/g, '');
+			var price    = $('.info .price').text().replace(/,/g, '');
+			var discount = $('.info .discount').text().replace(/,/g, '');
+			var delivery = $('.info .delivery').text().replace(/,/g, '');
+			var point    = $('.info .point').text().replace(/,/g, '');
+			var total    = $('.info .total').text().replace(/,/g, '');
+			
+			var params = {
+					"uid": uid,
+					"count": count,
+					"price": price,
+					"discount": discount,
+					"delivery": delivery,
+					"point": point,
+					"total": total,
+					"codes": codes
+					};
+			
+			$.ajax({
+				url: '/kmarket/shop/order',
+				type: 'post',
+				traditional: true,
+				data: params,
+				dataType: 'json',
+				success: function(data){
+					// 주문하기로 이동
+					location.href='/kmarket/shop/order?orderId='+data.orderId;	
+				}
+			});						
+			
+		});	
+		
+	});
+	
+</script>
+
+<main>
+    <th:block th:include="@{_category.html}"/>
+
+    <!-- 장바구니 -->
+    <section id="cart">
+      
+      <!-- 제목, 페이지 네비게이션 -->
+      <nav>
+        <h1>장바구니</h1>
+        <p>
+          HOME > <span>패션·의류·뷰티</span> > <strong>장바구니</strong>
+        </p>
+      </nav>
+      
+      <section>
+        <form action="#">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" name="all" checked></th>
+                <th>상품명</th>
+                <th>총수량</th>
+                <th>판매가</th>
+                <th>할인</th>
+                <th>포인트</th>
+                <th>배송비</th>
+                <th>소계</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="empty">
+                <td colspan="7">장바구니에 상품이 없습니다.</td>
+              </tr>
+              <tr th:each="product:${products}">
+                <td><input type="checkbox" class="product_check" th:name="${product.code}" th:value="${product.seq}" checked></td>
+                <td>
+                  <article>
+                    <a href="#"><img th:src="@{/thumb/{code1}/{code2}/{img}(code1=${product.cate1}, code2=${product.cate2}, img=${product.thumb1})}" alt=""></a>
+                    <div>
+                      <h2><a href="#">[[${product.name}]]</a></h2>
+                      <p></p>
+                    </div>
+                  </article>
+                </td>
+                <td class="count">[[${product.count}]]</td>
+                <td class="price">[[${#numbers.formatInteger(product.price, 3, 'COMMA')}]]</td>
+                <td class="discount" th:if="${product.discount} > 0">[[${product.discount}]]%</td>
+                <td class="discount" th:unless="${product.discount} > 0">-</td>
+                <td class="point">[[${product.point}]]</td>
+                <td class="delivery" th:if="${product.delivery} == 0">무료배송</td>
+                <td class="delivery" th:unless="${product.delivery} == 0">[[${#numbers.formatInteger(product.delivery, 3, 'COMMA')}]]</td>
+                <td class="total">[[${#numbers.formatInteger(product.total, 3, 'COMMA')}]]</td>
+              </tr>
+            </tbody>
+          </table>
+          <input type="button" name="del" value="선택삭제"/>
+        </form>
+      </section>
+
+      <div class="info">
+        <h2>전체합계</h2>        
+        <table border="0">
+          <tr>
+            <td>상품수</td>
+            <td class="count">0</td>
+          </tr>
+          <tr>
+            <td>상품금액</td>
+            <td class="price">0</td>
+          </tr>
+          <tr>
+            <td>할인금액</td>
+            <td class="discount">0</td>
+          </tr>
+          <tr>
+            <td>배송비</td>
+            <td class="delivery">0</td>
+          </tr>              
+          <tr>
+            <td>포인트</td>
+            <td class="point">0</td>
+          </tr>
+          <tr>
+            <td>전체주문금액</td>
+            <td class="total">0</td>
+          </tr>
+        </table>
+        <input type="button" name="order" value="주문하기">
+      </div>
+    </section>
+</main>
+<th:block th:include="@{_footer.html}"/>
+</html>

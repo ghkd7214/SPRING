@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.kmarket.dao.ShopDao">
+	
+	<select id="selectTitles" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT c1.title AS tit1, c2.title AS tit2 FROM `km_cate1` AS c1
+		JOIN `km_cate2` AS c2
+		ON c1.code1 = c2.code1
+		WHERE c1.code1 = #{cate1} AND c2.code2 = #{cate2};
+	</select>
+	
+	
+	<select id="selectProducts" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT *, Floor(price * (1 - discount / 100)) AS `salePrice` FROM `km_product` 
+		WHERE `cate1`=#{cate1} AND `cate2`=#{cate2}
+		<if test="sort == 1">ORDER BY `sold`   DESC;</if>
+		<if test="sort == 2">ORDER BY `price`  ASC;</if>
+		<if test="sort == 3">ORDER BY `price`  DESC;</if>
+		<if test="sort == 4">ORDER BY `score`  DESC;</if>
+		<if test="sort == 5">ORDER BY `review` DESC;</if>
+		<if test="sort == 6">ORDER BY `rdate`  DESC;</if>
+	</select>
+	
+	<select id="selectProduct" resultType="kr.co.kmarket.vo.ProductVo">
+		SELECT a.*, b.title AS tit1, c.title AS tit2, Floor(price * (1 - discount / 100)) AS `salePrice`
+		FROM `km_product` AS a
+		JOIN `km_cate1` AS b ON a.cate1 = b.code1
+		JOIN `km_cate2` AS c ON a.cate1 = c.code1 AND a.cate2 = c.code2
+		WHERE `code`=#{code};  
+	</select>
+	
+	<select id="selectCountCart" resultType="int">
+		SELECT COUNT(*) FROM `km_product_cart`
+		WHERE `uid`=#{uid} AND `code`=#{code};		
+	</select>
+	
+	<select id="selectCart" resultType="kr.co.kmarket.vo.CartVo">
+		SELECT a.*, b.cate1, b.cate2, b.thumb1 FROM `km_product_cart` AS a
+		JOIN `km_product` AS b
+		ON a.code = b.code
+		WHERE `uid`=#{uid}
+		ORDER BY `seq` DESC;
+	</select>
+	
+	<insert id="insertCart">
+		INSERT INTO `km_product_cart` SET 
+			`uid`=#{uid},
+			`code`=#{code},
+			`name`=#{name},
+			`count`=#{count},
+			`price`=#{price},
+			`discount`=#{discount},
+			`point`=#{point},
+			`delivery`=#{delivery},
+			`total`=#{total},
+			`rdate`=NOW();
+	</insert>
+	
+	<delete id="deleteCart">
+		DELETE FROM `km_product_cart` 
+		WHERE `seq` IN
+		<foreach collection="array" item="seq" open="(" close=")" separator=",">
+			#{seq}
+		</foreach>		
+	</delete>
+	
+	
+	<insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
+		INSERT INTO `km_product_order` SET
+		`uid`=#{uid},
+		`count`=#{count},
+		`price`=#{price},
+		`discount`=#{discount},
+		`delivery`=#{delivery},
+		`point`=#{point},
+		`total`=#{total},
+		`rdate`=NOW();
+	</insert>
+	
+	<insert id="insertOrderDetail">		
+		INSERT INTO `km_product_order_detail` (`orderId`, `code`) VALUES (#{orderId}, #{code});
+	</insert>
+	
+	<select id="selectOrder" resultType="kr.co.kmarket.vo.OrderVo">
+		SELECT a.*,
+		 c.`cate1`,
+ 		 c.`cate2`,
+ 		 c.`thumb1`,
+		 c.`name` AS pName, 
+		 c.`price` AS pPrice,  
+		 c.`discount` AS pDiscount, 
+		 c.`point` AS pPoint, 
+		 c.`delivery` AS pDelivery, 
+		 Floor(c.`price` * (1 - c.`discount` / 100) + c.`delivery`) AS `pTotal`
+		FROM `km_product_order` AS a
+		JOIN `km_product_order_detail` AS b
+		ON a.orderId = b.orderId
+		JOIN `km_product` AS c
+		ON b.code = c.code
+		WHERE `uid`=#{uid} AND a.`orderId`=#{orderId};
+	</select>
+
+</mapper>
