@@ -1,0 +1,24 @@
+1. pom.xml 버전변경
+- SPRING 버전 4.3.28
+- JAVA 버전 1.8
+- properties - Project Facets - 자바버전 1.8 변경
+
+2. src - main - webapp - WEB-INF
+- class 폴더 삭제
+- spring 폴더 삭제
+- views - home.jsp 삭제
+
+3. web.xml 수정
+- 내용 삭제
+
+4. src/main/java/ 패키지
+- HomeController.java 삭제
+
+5. src/main/resources
+- spring-context.xml 파일 생성
+- aop, beans, c, context, mvc, p 네임스페이스 지정
+
+6. 필요한 라이브러리 추가
+- pom.xml - dependency 추가
+
+
