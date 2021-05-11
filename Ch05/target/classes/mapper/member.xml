@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.member">
+	<!-- SQL 쿼리문 설정 -->
+	
+	<insert id="INSERT_MEMBER">
+		 	INSERT INTO `MEMBER` SET `uid`=#{uid},
+		 							 `name`=#{name},
+		 							 `hp`=#{hp},
+		 							 `pos`=#{pos},
+		 							 `dep`=#{dep},
+		 							 `rdate`=NOW();
+	</insert>
+	
+	<select id="SELECT_MEMBERS" resultType="kr.co.ch05.vo.MemberVo">
+		SELECT * FROM `MEMBER`;
+	</select>
+	
+	<select id="SELECT_MEMBER" resultType="kr.co.ch05.vo.MemberVo">
+		SELECT * FROM `MEMBER` WHERE `uid`=#{uid};
+	</select>
+	
+	<update id="UPDATE_MEMBER">
+		UPDATE `MEMBER` SET `name`=#{name},`hp`=#{hp},`pos`=#{pos},`dep`=#{dep} WHERE `uid`=#{uid};	
+	</update>
+	
+	<delete id="DELETE_MEMBER">
+		DELETE FROM `MEMBER` WHERE `uid`=#{uid};
+	</delete>
+	
+</mapper>
